@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
   version: 1.0.0
-  title: BlogApp コメント API
+  title: blog-service コメント API
   description: |
-    # BlogApp コメント API
+    # blog-service コメント API
 
-    BlogApp 用のコメント管理APIです。
+    blog-service 用のコメント管理APIです。
     ユーザーは投稿に対してコメントを投稿、編集、削除できます。
 
     ## 機能
@@ -58,6 +58,21 @@ paths:
       responses:
         '202':
           description: '認証トークンを送信しました / Verification token sent'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      email:
+                        type: string
+                      expires_at:
+                        type: string
+                        format: date-time
         '422':
           description: 'バリデーションエラー / Validation error'
 
@@ -96,6 +111,24 @@ paths:
       responses:
         '201':
           description: '会員登録が完了しました / Registration completed'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+                      token_type:
+                        type: string
+                        enum:
+                          - Bearer
         '422':
           description: 'バリデーションエラー / Validation error'
 
@@ -127,6 +160,24 @@ paths:
       responses:
         '200':
           description: 'ログイン成功 / Login successful'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+                      token_type:
+                        type: string
+                        enum:
+                          - Bearer
         '422':
           description: 'バリデーションエラー / Validation error'
 
@@ -145,6 +196,16 @@ paths:
       responses:
         '200':
           description: '成功 / Success'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
         '401':
           description: '未認証 / Unauthenticated'
 
@@ -163,6 +224,9 @@ paths:
       responses:
         '200':
           description: 'ログアウト成功 / Logout successful'
+          content:
+            application/json:
+              example: null
         '401':
           description: '未認証 / Unauthenticated'
 
@@ -311,9 +375,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CommentCreate'
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  minLength: 10
+                  maxLength: 100
+                  example: 'これは非常に有用なコメントです'
+                parent_id:
+                  type: integer
+                  nullable: true
+                  description: 'コメント返信時の親コメントID（オプション） / Parent comment ID for nested replies (optional)'
+                  example: null
             example:
               content: 'これは非常に有用なコメントです'
+              parent_id: null
       responses:
         '201':
           description: 'コメントが正常に作成されました / Comment created successfully'
@@ -378,7 +456,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CommentUpdate'
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  minLength: 10
+                  maxLength: 100
+                  example: '編集されたコメント内容です'
             example:
               content: '編集されたコメント内容です'
       responses:
@@ -494,10 +580,11 @@ components:
           type: integer
           description: 'コメントを投稿したユーザーのID / ID of the user who posted the comment'
           example: 1
-        created_at:
-          type: string
-          format: date-time
-          description: 'コメント作成日時（ISO 8601形式） / Comment creation date (ISO 8601 format)'
+    parent_id:
+      type: integer
+      nullable: true
+      description: '返信先のコメントID（ネスト対応） / Parent comment ID for nested replies'
+      example: null
           example: '2024-01-01T12:00:00Z'
         updated_at:
           type: string
@@ -532,3 +619,31 @@ components:
           minLength: 10
           maxLength: 100
           example: '編集されたコメント内容です'
+
+    User:
+      type: object
+      title: 'ユーザー / User'
+      description: 'ユーザー情報 / User information'
+      properties:
+        id:
+          type: integer
+          description: 'ユーザーID / User ID'
+          example: 1
+        name:
+          type: string
+          description: 'ユーザー名 / User name'
+          example: 'John Doe'
+        email:
+          type: string
+          format: email
+          description: 'メールアドレス / Email address'
+          example: 'john@example.com'
+        is_admin:
+          type: boolean
+          description: '管理者フラグ / Admin flag'
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: 'ユーザー作成日時 / User creation date'
+          example: '2024-01-01T00:00:00Z'

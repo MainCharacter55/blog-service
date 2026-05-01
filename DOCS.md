@@ -1,3 +1,9 @@
+English text at bottom.
+---------------------------------------------------
+
+日本語
+====
+
 1. 提出課題の概要 / Project Overview
 本プロジェクトは、API提供だけでなく、ユーザーが直接利用できるGUI（Blade）を備えたフルスタックのブログアプリケーション 「blog-service」 として構築しました。
 
@@ -40,8 +46,8 @@ RESTful API設計:
 コードの共通化: AppServiceProvider でのレートリミッター定義や、バリデーションロジックの共通化に配慮しました。
 
 ネスト構造: コメントに対する返信機能（親子関係）が正しくDBおよびAPIで処理されているかをご確認いただけますと幸いです。
-
 ---------------------------------------------------
+
 起動・利用方法 (Usage)
 起動
 Bash
@@ -55,6 +61,15 @@ API Documentation:
 Swagger: http://localhost:8002/
 ReDoc: http://localhost:8003/
 Mail Confirmation (Mailpit): http://localhost:8025/
+---------------------------------------------------
+
+Review1 後の改善内容 (Improvement After Review1)
+- Swagger / ReDoc: 実装と仕様の差分を見直し、`routes/api.php` のエンドポイントと `docs/api/comment-api.yml` のパス・操作定義が一致することを確認しました。さらに、仕様を修正し、パスワード要件（最小12文字、大小英字・数字・記号を含む）、レスポンス構造（message/data フィールド、token_type）、ネストコメント対応（parent_id）、ユーザースキーマを追加しました。
+- PHPDoc: API Controller および FormRequest にクラス単位の PHPDoc を追加し、責務と意図が分かるように改善しました。
+- 設計（SRP / Fat Controller 対策）: API のバリデーション責務を FormRequest に集約し、Controller 側の重複チェックを削除しました。
+- Route Model Binding: API コメント更新・削除での冗長な関連チェックを削除し、`scopeBindings` と Policy を前提にシンプル化しました。
+- Request 命名規約: `StoreApi* / UpdateApi* / StoreWeb* / UpdateWeb*` 形式へ統一しました。
+- ReDoc: `docker-compose.yml` の設定を修正し、`http://localhost:8003` で表示できるようにしました。
 ---------------------------------------------------
 
 English
@@ -79,6 +94,7 @@ Tasks completed
 4. Review Focus
 - Please verify validation and common logic centralization (e.g., rate limiter, FormRequest usage).
 - Please check nested comment reply handling at DB and API levels.
+---------------------------------------------------
 
 Usage / Run
 - Start the app: `./vendor/bin/sail up -d`
@@ -87,22 +103,10 @@ Usage / Run
 - Swagger UI: http://localhost:8002/
 - ReDoc: http://localhost:8003/
 - Mailpit: http://localhost:8025/
-
-If you maintain a different OpenAPI filename, update `OPENAPI_FILE_NAME` in your `.env` to match the file under `docs/api`.
-
 ---------------------------------------------------
+
 Review1 後の改善内容 (Improvement After Review1)
-
-日本語
-- Swagger / ReDoc: 実装と仕様の差分を見直し、`routes/api.php` のエンドポイントと `docs/api/comment-api.yml` のパス・操作定義が一致することを確認しました。
-- PHPDoc: API Controller および FormRequest にクラス単位の PHPDoc を追加し、責務と意図が分かるように改善しました。
-- 設計（SRP / Fat Controller 対策）: API のバリデーション責務を FormRequest に集約し、Controller 側の重複チェックを削除しました。
-- Route Model Binding: API コメント更新・削除での冗長な関連チェックを削除し、`scopeBindings` と Policy を前提にシンプル化しました。
-- Request 命名規約: `StoreApi* / UpdateApi* / StoreWeb* / UpdateWeb*` 形式へ統一しました。
-- ReDoc: `docker-compose.yml` の設定を修正し、`http://localhost:8003` で表示できるようにしました。
-
-English
-- Swagger / ReDoc: Rechecked implementation-vs-spec alignment and verified API paths/operations in `docs/api/comment-api.yml` match `routes/api.php`.
+- Swagger / ReDoc: Rechecked implementation-vs-spec alignment and verified API paths/operations in `docs/api/comment-api.yml` match `routes/api.php`. Updated spec with correct password requirements (min 12 chars, mixed case, numbers, symbols), response structures (message/data fields, token_type), nested comment support (parent_id), and User schema.
 - PHPDoc: Added class-level PHPDoc to API controllers and FormRequest classes to improve readability and tooling support.
 - Design (SRP / avoiding Fat Controller): Centralized API validation in FormRequest classes and removed duplicated validation logic from controllers.
 - Route Model Binding: Removed redundant parent-child checks in API comment update/delete and relied on `scopeBindings` + policies.
