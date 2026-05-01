@@ -3,7 +3,7 @@
 @section('content')
     <section class="mx-auto w-full max-w-4xl space-y-6">
         <div class="rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-cyan-950/20 backdrop-blur">
-            <p class="text-sm uppercase tracking-[0.28em] text-cyan-300">BlogApp</p>
+            <p class="text-sm uppercase tracking-[0.28em] text-cyan-300">blog-service</p>
             <h1 class="mt-4 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
                 気軽に読めて、すぐ投稿できるシンプルなブログ。
             </h1>
@@ -33,7 +33,7 @@
 
             <div class="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-cyan-400/15 to-emerald-400/10 p-5">
                 <p class="text-xs uppercase tracking-[0.24em] text-cyan-200">Brand</p>
-                <h2 class="mt-2 text-lg font-semibold text-white">BlogApp</h2>
+                <h2 class="mt-2 text-lg font-semibold text-white">blog-service</h2>
                 <p class="mt-3 text-sm leading-6 text-slate-200/90">
                     backend tutorial という仮名から、ブログ用途にそのまま使える名前へ整理しました。
                 </p>

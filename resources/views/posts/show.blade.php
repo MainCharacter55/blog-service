@@ -60,10 +60,10 @@
                 <p>{{ $post->content }}</p>
             </div>
 
-            <div class="mt-6 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4 text-sm text-slate-300">
+            <div class="mt-6 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4 text-sm text-slate-300" data-post-reactions>
                 @auth
                     @foreach ($topPostReactions as $item)
-                        <form method="POST" action="{{ route('posts.reaction.toggle', $post) }}">
+                        <form method="POST" action="{{ route('posts.reaction.toggle', $post) }}" data-ajax="reaction">
                             @csrf
                             <input type="hidden" name="reaction" value="{{ $item['key'] }}">
                             <button type="submit" class="inline-flex items-center gap-2 rounded-full border px-3 py-1 transition {{ $currentUserPostReaction === $item['key'] ? 'border-cyan-400/40 bg-cyan-400/20 text-cyan-100' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10' }}">
@@ -88,7 +88,7 @@
                             <div class="border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-slate-400">Other Reactions</div>
                             <div class="max-h-80 overflow-y-auto p-2">
                                 @forelse ($otherPostReactionMenuItems as $item)
-                                    <form method="POST" action="{{ route('posts.reaction.toggle', $post) }}">
+                                    <form method="POST" action="{{ route('posts.reaction.toggle', $post) }}" data-ajax="reaction">
                                         @csrf
                                         <input type="hidden" name="reaction" value="{{ $item['key'] }}">
                                         <button type="submit" class="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition {{ $currentUserPostReaction === $item['key'] ? 'bg-cyan-400/15 text-cyan-100' : 'text-slate-200 hover:bg-white/10' }}">
@@ -104,15 +104,33 @@
                     </div>
                 @else
                     @foreach ($topPostReactions as $item)
-                        <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200">
+                        <button
+                            type="button"
+                            class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10"
+                            data-guest-auth-warning-trigger
+                            data-guest-auth-warning-title="リアクションにはログインが必要です"
+                            data-guest-auth-warning-message="投稿にリアクションするにはログインまたは会員登録をしてください。"
+                        >
                             <span>{{ $item['meta']['emoji'] }}</span>
                             <span class="text-xs text-slate-300">{{ $item['total'] }}</span>
-                        </span>
+                        </button>
                     @endforeach
-                    <a href="{{ route('login') }}" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10">Others ▾</a>
+                    <button
+                        type="button"
+                        class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10"
+                        data-guest-auth-warning-trigger
+                        data-guest-auth-warning-title="リアクションにはログインが必要です"
+                        data-guest-auth-warning-message="投稿にリアクションするにはログインまたは会員登録をしてください。"
+                    >
+                        Others ▾
+                    </button>
                 @endauth
 
-                <a href="#comment-form" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">{{ $post->comments_count }} comments</a>
+                @auth
+                    <a href="#comment-form" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">{{ $post->comments_count }} comments</a>
+                @else
+                    <a href="#comments" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">{{ $post->comments_count }} comments</a>
+                @endauth
             </div>
         </section>
 
@@ -133,7 +151,7 @@
             </div>
 
             @auth
-                <form method="POST" action="{{ route('posts.comments.store', $post) }}" class="mt-4 space-y-4">
+                <form method="POST" action="{{ route('posts.comments.store', $post) }}" class="mt-4 space-y-4" data-ajax="comment">
                     @csrf
                     <input type="text" name="website" value="" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
                     <input type="hidden" name="comment_sort" value="{{ $commentSort }}">
@@ -148,9 +166,18 @@
                     <button class="inline-flex items-center rounded-full bg-cyan-400 px-5 py-3 font-medium text-slate-950 transition hover:bg-cyan-300">投稿する</button>
                 </form>
             @else
-                <p class="mt-4 text-sm leading-6 text-slate-300">
-                    コメント投稿にはログインが必要です。<a href="{{ route('login') }}" class="text-cyan-300 underline decoration-cyan-300/40 underline-offset-4">ログイン</a> または <a href="{{ route('register') }}" class="text-cyan-300 underline decoration-cyan-300/40 underline-offset-4">会員登録</a> を行ってください。
-                </p>
+                <div class="mt-4 rounded-2xl border border-white/10 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">
+                    <p>コメント投稿にはログインが必要です。</p>
+                    <button
+                        type="button"
+                        class="mt-3 inline-flex items-center rounded-full bg-cyan-400 px-4 py-2 font-medium text-slate-950 transition hover:bg-cyan-300"
+                        data-guest-auth-warning-trigger
+                        data-guest-auth-warning-title="コメントにはログインが必要です"
+                        data-guest-auth-warning-message="コメントを投稿するにはログインまたは会員登録をしてください。"
+                    >
+                        ログイン / 会員登録
+                    </button>
+                </div>
             @endauth
         </section>
 

@@ -75,7 +75,8 @@ class BlogController extends Controller
      */
     public function popular(): Response
     {
-        $popularityScoreExpression = '(COALESCE(post_reaction_stats.reaction_score, 0) * 1.5) + (comments_count * 2) + (posts.views_count * 0.2)';
+        $commentsCountSubquery = '(select count(*) from comments where posts.id = comments.post_id and comments.deleted_at is null)';
+        $popularityScoreExpression = '(COALESCE(post_reaction_stats.reaction_score, 0) * 1.5) + (' . $commentsCountSubquery . ' * 2) + (posts.views_count * 0.2)';
 
         $posts = $this->basePostFeedQuery()
             ->selectRaw("{$popularityScoreExpression} as popularity_score")

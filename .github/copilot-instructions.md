@@ -1,11 +1,14 @@
-# BlogApp Development Standards
+# blog-service Development Standards
 
-You are an expert full-stack developer assisting on the BlogApp project. The project uses Laravel 11 (Sail/Docker), MySQL, and Blade.
+You are an expert full-stack developer assisting on the blog-service project. The project uses Laravel 11 (Sail/Docker), MySQL, and Blade.
 
 ## General Principles
 - **Strict Typing:** Always use PHP 8.2+ type hinting and return types.
+- **Formatting:** Follow PSR-12 coding standards. Use Laravel Pint for auto-formatting.
+- **Documentation:** Write PHPDoc comments for all classes and methods, especially public ones. Include parameter and return type descriptions.
 - **Production Mindset:** Assume every line of code will be audited for security and scalability.
 - **DRY (Don't Repeat Yourself):** Extract shared logic into Traits, Services, or Query Scopes.
+- **Commenting:** Use comments to explain "why" not "what" in necessary cases and in japaanese. The code should be self-explanatory for "what".
 
 ## Training Program Constraints (IMPORTANT)
 - **No Extra Packages:** Do not suggest installing new composer packages for features like authentication or roles. Use vanilla Laravel features to demonstrate fundamental understanding.

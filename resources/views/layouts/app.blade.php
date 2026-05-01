@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'BlogApp') }}</title>
+        <title>{{ config('app.name', 'blog-service') }}</title>
 
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
             @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -29,7 +29,7 @@
                             B
                         </div>
                         <div>
-                            <p class="text-lg font-semibold tracking-tight">BlogApp</p>
+                            <p class="text-lg font-semibold tracking-tight">blog-service</p>
                             <p class="text-xs text-slate-400">Simple blog platform</p>
                         </div>
                     </a>
@@ -139,7 +139,7 @@
                     </div>
 
                     <div class="mt-8 border-t border-white/10 pt-4 text-sm text-slate-400">
-                        <p>&copy; {{ now()->year }} BlogApp. All rights reserved.</p>
+                        <p>&copy; {{ now()->year }} blog-service. All rights reserved.</p>
                     </div>
                 </footer>
             </div>
@@ -193,5 +193,38 @@
                 });
             });
         </script>
+
+        <div class="fixed inset-0 z-50 hidden flex items-center justify-center px-4 py-6" data-guest-auth-warning>
+            <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" data-guest-auth-warning-overlay></div>
+
+            <div class="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950 shadow-2xl shadow-black/60">
+                <button
+                    type="button"
+                    class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-cyan-100"
+                    data-guest-auth-warning-close
+                    aria-label="Close warning"
+                >
+                    ×
+                </button>
+
+                <div class="p-6 sm:p-8">
+                    <p class="text-xs uppercase tracking-[0.28em] text-cyan-300">Guest action</p>
+                    <h2 class="mt-3 pr-12 text-2xl font-semibold text-white" data-guest-auth-warning-title>ログインが必要です</h2>
+                    <p class="mt-3 text-sm leading-7 text-slate-300" data-guest-auth-warning-message>この操作を続けるにはログインまたは会員登録が必要です。</p>
+
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <a href="{{ route('login') }}" class="inline-flex items-center rounded-full bg-cyan-400 px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-cyan-300" data-guest-auth-warning-login>
+                            ログインへ進む
+                        </a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10" data-guest-auth-warning-register>
+                            会員登録へ進む
+                        </a>
+                        <button type="button" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium text-slate-200 transition hover:bg-white/10" data-guest-auth-warning-close>
+                            閉じる
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

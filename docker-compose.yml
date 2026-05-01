@@ -70,11 +70,21 @@ services:
         environment:
             SWAGGER_JSON: '/openapi/openapi.yml'
         volumes:
+            - './docs/api/${OPENAPI_FILE_NAME}:/usr/share/nginx/html/openapi/openapi.yml'
             - './docs/api/${OPENAPI_FILE_NAME}:/openapi/openapi.yml'
         networks:
             - sail
     ## ReDoc
-    # IMPLEMENT HERE
+    redoc:
+        image: redocly/redoc:latest
+        ports:
+            - '8003:80'
+        environment:
+            SPEC_URL: '/openapi/${OPENAPI_FILE_NAME}'
+        volumes:
+            - './docs/api:/usr/share/nginx/html/openapi:ro'
+        networks:
+            - sail
 
 networks:
     sail:

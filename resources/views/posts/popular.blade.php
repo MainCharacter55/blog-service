@@ -112,15 +112,33 @@
                             </div>
                         @else
                             @foreach ($topPostReactions as $item)
-                                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200">
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10"
+                                    data-guest-auth-warning-trigger
+                                    data-guest-auth-warning-title="リアクションにはログインが必要です"
+                                    data-guest-auth-warning-message="投稿にリアクションするにはログインまたは会員登録をしてください。"
+                                >
                                     <span>{{ $item['meta']['emoji'] }}</span>
                                     <span class="text-xs text-slate-300">{{ $item['total'] }}</span>
-                                </span>
+                                </button>
                             @endforeach
-                            <a href="{{ route('login') }}" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10">Others ▾</a>
+                            <button
+                                type="button"
+                                class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10"
+                                data-guest-auth-warning-trigger
+                                data-guest-auth-warning-title="リアクションにはログインが必要です"
+                                data-guest-auth-warning-message="投稿にリアクションするにはログインまたは会員登録をしてください。"
+                            >
+                                Others ▾
+                            </button>
                         @endauth
 
-                        <a href="{{ route('posts.show', $post) }}#comment-form" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">{{ $post->comments_count }} comments</a>
+                        @auth
+                            <a href="{{ route('posts.show', $post) }}#comment-form" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">{{ $post->comments_count }} comments</a>
+                        @else
+                            <a href="{{ route('posts.show', $post) }}#comments" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10">{{ $post->comments_count }} comments</a>
+                        @endauth
                     </div>
                 </div>
             @empty

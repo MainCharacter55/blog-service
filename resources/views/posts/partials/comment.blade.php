@@ -4,6 +4,25 @@
     $canManageComment = auth()->check() && ($isOwnComment || auth()->user()->isAdmin());
     $isEditingComment = (string) request('edit_comment') === (string) $comment->id;
     $isReplyTarget = (string) request('reply_to') === (string) $comment->id || (string) old('parent_id') === (string) $comment->id;
+    $activeThreadTargetId = request('edit_comment') ?? request('reply_to') ?? old('parent_id');
+    $containsThreadTarget = function (string $parentId, string $targetId) use (&$containsThreadTarget, $commentsByParentId): bool {
+        $children = $commentsByParentId->get((int) $parentId, collect());
+
+        foreach ($children as $child) {
+            if ((string) $child->id === $targetId) {
+                return true;
+            }
+
+            if ($containsThreadTarget((string) $child->id, $targetId)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+    $shouldExpandReplies = $childComments->isNotEmpty()
+        && $activeThreadTargetId !== null
+        && $containsThreadTarget((string) $comment->id, (string) $activeThreadTargetId);
     $currentUserCommentReaction = $currentUserCommentReactions[$comment->id] ?? null;
     $commentReactionSummary = $commentReactionSummaries[$comment->id] ?? [];
 
@@ -86,7 +105,7 @@
                             <span class="text-cyan-300">✎</span>
                             コメントを編集
                         </a>
-                        <form method="POST" action="{{ route('posts.comments.destroy', [$post, $comment]) }}">
+                        <form method="POST" action="{{ route('posts.comments.destroy', [$post, $comment]) }}" data-ajax="comment-delete">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-rose-200 transition hover:bg-rose-400/10 hover:text-rose-100">
@@ -110,7 +129,7 @@
     </div>
 
     @if ($isEditingComment && $canManageComment)
-        <form method="POST" action="{{ route('posts.comments.update', [$post, $comment]) }}" class="mt-3 space-y-3 rounded-2xl border border-cyan-400/30 bg-cyan-400/5 p-4">
+        <form method="POST" action="{{ route('posts.comments.update', [$post, $comment]) }}" class="mt-3 space-y-3 rounded-2xl border border-cyan-400/30 bg-cyan-400/5 p-4" data-ajax="comment-edit">
             @csrf
             @method('PATCH')
             <label for="edit-comment-content-{{ $comment->id }}" class="block text-xs uppercase tracking-[0.22em] text-cyan-300">コメントを編集</label>
@@ -133,13 +152,13 @@
             </div>
         </form>
     @else
-        <p class="mt-3 text-sm leading-6 text-slate-200">{{ $comment->content }}</p>
+        <p class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-200">{{ $comment->content }}</p>
     @endif
 
     <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-slate-300">
         @auth
             @foreach ($topCommentReactions as $item)
-                <form method="POST" action="{{ route('posts.comments.reaction.toggle', [$post, $comment]) }}">
+                <form method="POST" action="{{ route('posts.comments.reaction.toggle', [$post, $comment]) }}" data-ajax="reaction">
                     @csrf
                     <input type="hidden" name="reaction" value="{{ $item['key'] }}">
                     <input type="hidden" name="comment_sort" value="{{ $commentSort }}">
@@ -165,7 +184,7 @@
                     <div class="border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-slate-400">Other Reactions</div>
                     <div class="max-h-80 overflow-y-auto p-2">
                         @forelse ($otherReactionMenuItems as $item)
-                            <form method="POST" action="{{ route('posts.comments.reaction.toggle', [$post, $comment]) }}">
+                            <form method="POST" action="{{ route('posts.comments.reaction.toggle', [$post, $comment]) }}" data-ajax="reaction">
                                 @csrf
                                 <input type="hidden" name="reaction" value="{{ $item['key'] }}">
                                 <input type="hidden" name="comment_sort" value="{{ $commentSort }}">
@@ -182,12 +201,26 @@
             </div>
         @else
             @foreach ($topCommentReactions as $item)
-                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200">
+                <button
+                    type="button"
+                    class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10"
+                    data-guest-auth-warning-trigger
+                    data-guest-auth-warning-title="リアクションにはログインが必要です"
+                    data-guest-auth-warning-message="コメントにリアクションするにはログインまたは会員登録をしてください。"
+                >
                     <span>{{ $item['meta']['emoji'] }}</span>
                     <span class="text-xs text-slate-300">{{ $item['total'] }}</span>
-                </span>
+                </button>
             @endforeach
-            <a href="{{ route('login') }}" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10">Others ▾</a>
+            <button
+                type="button"
+                class="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200 transition hover:bg-white/10"
+                data-guest-auth-warning-trigger
+                data-guest-auth-warning-title="リアクションにはログインが必要です"
+                data-guest-auth-warning-message="コメントにリアクションするにはログインまたは会員登録をしてください。"
+            >
+                Others ▾
+            </button>
         @endauth
 
         <button type="button" class="rounded-full border border-white/10 bg-white/5 px-3 py-1 transition hover:bg-white/10" data-toggle-replies data-comment-id="{{ $comment->id }}">
@@ -195,9 +228,9 @@
         </button>
     </div>
 
-    @auth
-        <div class="mt-4 border-t border-white/10 pt-4 {{ $isReplyTarget ? '' : 'hidden' }}" data-reply-form-container="{{ $comment->id }}">
-            <form method="POST" action="{{ route('posts.comments.store', $post) }}" class="space-y-3">
+    <div class="mt-4 border-t border-white/10 pt-4 {{ $isReplyTarget ? '' : 'hidden' }}" data-reply-form-container="{{ $comment->id }}">
+        @auth
+            <form method="POST" action="{{ route('posts.comments.store', $post) }}" class="space-y-3" data-ajax="reply">
                 @csrf
                 <input type="text" name="website" value="" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
                 <input type="hidden" name="parent_id" value="{{ $comment->id }}">
@@ -221,11 +254,26 @@
                     </a>
                 </div>
             </form>
-        </div>
-    @endauth
+        @else
+            <div class="space-y-3">
+                <p class="text-sm text-slate-300">コメントを投稿するにはログインが必要です。</p>
+                <div class="flex flex-wrap gap-3">
+                    <button
+                        type="button"
+                        class="rounded-full bg-cyan-400 px-4 py-2 text-sm font-medium text-slate-950 transition hover:bg-cyan-300"
+                        data-guest-auth-warning-trigger
+                        data-guest-auth-warning-title="コメントにはログインが必要です"
+                        data-guest-auth-warning-message="コメントを投稿するにはログインまたは会員登録をしてください。"
+                    >
+                        ログイン / 会員登録
+                    </button>
+                </div>
+            </div>
+        @endauth
+    </div>
 
     @if ($childComments->isNotEmpty())
-        <div class="mt-4 space-y-4 border-l border-white/10 pl-4 hidden" data-replies-container="{{ $comment->id }}">
+        <div class="mt-4 space-y-4 border-l border-white/10 pl-4 {{ $shouldExpandReplies ? '' : 'hidden' }}" data-replies-container="{{ $comment->id }}">
             @foreach ($childComments as $childComment)
                 @include('posts.partials.comment', [
                     'comment' => $childComment,

@@ -53,7 +53,16 @@ docker compose up -d swagger redoc
 ## Web UI について
 
 Web 画面では投稿閲覧、コメント投稿、返信、リアクションまで利用できます。
+---------------------------------------------------
 
+Review1 後の改善内容 (Improvement After Review1)
+
+- Swagger / ReDoc: 実装と仕様の差分を見直し、`routes/api.php` のエンドポイントと `docs/api/comment-api.yml` のパス・操作定義が一致することを確認しました。さらに、仕様を修正し、パスワード要件（最小12文字、大小英字・数字・記号を含む）、レスポンス構造（message/data フィールド、token_type）、ネストコメント対応（parent_id）、ユーザースキーマを追加しました。
+- PHPDoc: API Controller および FormRequest にクラス単位の PHPDoc を追加し、責務と意図が分かるように改善しました。
+- 設計（SRP / Fat Controller 対策）: API のバリデーション責務を FormRequest に集約し、Controller 側の重複チェックを削除しました。
+- Route Model Binding: API コメント更新・削除での冗長な関連チェックを削除し、`scopeBindings` と Policy を前提にシンプル化しました。
+- Request 命名規約: `StoreApi* / UpdateApi* / StoreWeb* / UpdateWeb*` 形式へ統一しました。
+- ReDoc: `docker-compose.yml` の設定を修正し、`http://localhost:8003` で表示できるようにしました。
 ---------------------------------------------------
 
 English
@@ -112,18 +121,10 @@ The current web interface supports post browsing, comments, replies, and reactio
 
 Review1 後の改善内容 (Improvement After Review1)
 
-日本語
-- Swagger / ReDoc: 実装と仕様の差分を見直し、`routes/api.php` のエンドポイントと `docs/api/comment-api.yml` のパス・操作定義が一致することを確認しました。さらに、仕様を修正し、パスワード要件（最小12文字、大小英字・数字・記号を含む）、レスポンス構造（message/data フィールド、token_type）、ネストコメント対応（parent_id）、ユーザースキーマを追加しました。
-- PHPDoc: API Controller および FormRequest にクラス単位の PHPDoc を追加し、責務と意図が分かるように改善しました。
-- 設計（SRP / Fat Controller 対策）: API のバリデーション責務を FormRequest に集約し、Controller 側の重複チェックを削除しました。
-- Route Model Binding: API コメント更新・削除での冗長な関連チェックを削除し、`scopeBindings` と Policy を前提にシンプル化しました。
-- Request 命名規約: `StoreApi* / UpdateApi* / StoreWeb* / UpdateWeb*` 形式へ統一しました。
-- ReDoc: `docker-compose.yml` の設定を修正し、`http://localhost:8003` で表示できるようにしました。
-
-English
 - Swagger / ReDoc: Rechecked implementation-vs-spec alignment and verified API paths/operations in `docs/api/comment-api.yml` match `routes/api.php`. Updated spec with correct password requirements (min 12 chars, mixed case, numbers, symbols), response structures (message/data fields, token_type), nested comment support (parent_id), and User schema.
 - PHPDoc: Added class-level PHPDoc to API controllers and FormRequest classes to improve readability and tooling support.
 - Design (SRP / avoiding Fat Controller): Centralized API validation in FormRequest classes and removed duplicated validation logic from controllers.
 - Route Model Binding: Removed redundant parent-child checks in API comment update/delete and relied on `scopeBindings` + policies.
 - Request naming convention: Standardized request class names to `StoreApi* / UpdateApi* / StoreWeb* / UpdateWeb*`.
-- ReDoc: Updated `docker-compose.yml` so ReDoc is available at `http://localhost:8003`.\n---------------------------------------------------
+- ReDoc: Updated `docker-compose.yml` so ReDoc is available at `http://localhost:8003`.
+---------------------------------------------------

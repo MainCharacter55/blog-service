@@ -12,6 +12,30 @@ class WebCommentFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_post_detail_popular_comment_sort_loads_successfully(): void
+    {
+        $post = Post::factory()->create();
+        $user = User::factory()->create();
+
+        $parent = Comment::factory()->create([
+            'post_id' => $post->id,
+            'user_id' => $user->id,
+        ]);
+
+        Comment::factory()->create([
+            'post_id' => $post->id,
+            'user_id' => $user->id,
+            'parent_id' => $parent->id,
+        ]);
+
+        $response = $this->get(route('posts.show', [
+            'post' => $post,
+            'comment_sort' => 'popular',
+        ]));
+
+        $response->assertOk();
+    }
+
     public function test_comment_owner_can_open_inline_edit_mode_and_update_comment(): void
     {
         $user = User::factory()->create();
